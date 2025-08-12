@@ -1,0 +1,55 @@
+# Git ignore rules scoped to the Spring Boot backend folder
+
+# Spring Initializr helper file
+/multipagos-backend/HELP.md
+
+# Maven / build outputs
+/multipagos-backend/**/target/
+!/multipagos-backend/**/src/main/**/target/
+!/multipagos-backend/**/src/test/**/target/
+
+# Maven wrapper (kept consistent with existing project settings)
+/multipagos-backend/.mvn/wrapper/maven-wrapper.jar
+
+# STS
+/multipagos-backend/.apt_generated
+/multipagos-backend/.classpath
+/multipagos-backend/.factorypath
+/multipagos-backend/.project
+/multipagos-backend/.settings
+/multipagos-backend/.springBeans
+/multipagos-backend/.sts4-cache
+
+# IntelliJ IDEA
+/multipagos-backend/.idea
+/multipagos-backend/*.iws
+/multipagos-backend/*.iml
+/multipagos-backend/*.ipr
+
+# NetBeans
+/multipagos-backend/nbproject/private/
+/multipagos-backend/nbbuild/
+/multipagos-backend/dist/
+/multipagos-backend/nbdist/
+/multipagos-backend/.nb-gradle/
+/multipagos-backend/build/
+!/multipagos-backend/**/src/main/**/build/
+!/multipagos-backend/**/src/test/**/build/
+
+# VS Code
+/multipagos-backend/.vscode/
+
+# Monorepo-wide ignores (helpful for future frontend)
+**/node_modules/
+**/dist/
+**/.next/
+**/.nuxt/
+**/coverage/
+**/.turbo/
+
+# OS and editor cruft
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
