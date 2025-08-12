@@ -47,9 +47,34 @@
 **/coverage/
 **/.turbo/
 
-# OS and editor cruft
-.DS_Store
-Thumbs.db
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE files
 .idea/
 .vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build files
+target/
+build/
+*.jar
+*.war
+*.ear
+
+# Logs
 *.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
