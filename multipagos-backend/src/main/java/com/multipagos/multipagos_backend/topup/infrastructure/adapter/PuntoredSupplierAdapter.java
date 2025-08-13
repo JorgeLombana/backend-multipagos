@@ -35,7 +35,7 @@ public class PuntoredSupplierAdapter implements SupplierPort {
       headers.set("authorization", token.getBearerToken());
       HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-      log.info("Getting suppliers from Puntored API");
+      log.info("[PUNTORED SUPPLIERS] Calling Puntored API | url: {}", url);
       ResponseEntity<List<SupplierDto>> response = restTemplate.exchange(
           url,
           HttpMethod.GET,
@@ -44,16 +44,17 @@ public class PuntoredSupplierAdapter implements SupplierPort {
           });
 
       if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-        log.info("Successfully retrieved {} suppliers", response.getBody().size());
+        log.info("[PUNTORED SUPPLIERS] Successfully retrieved {} suppliers from API", response.getBody().size());
         return response.getBody().stream()
             .map(dto -> new Supplier(dto.getId(), dto.getName()))
             .collect(Collectors.toList());
       } else {
-        throw new RuntimeException("Failed to get suppliers: " + response.getStatusCode());
+        log.error("[PUNTORED SUPPLIERS] Failed to get suppliers | status: {}", response.getStatusCode());
+        throw new RuntimeException("Error al obtener proveedores: " + response.getStatusCode());
       }
     } catch (RestClientException e) {
-      log.error("Error getting suppliers from Puntored API", e);
-      throw new RuntimeException("Failed to get suppliers", e);
+      log.error("[PUNTORED SUPPLIERS] Error getting suppliers from Puntored API | error: {}", e.getMessage(), e);
+      throw new RuntimeException("Error al obtener proveedores", e);
     }
   }
 }

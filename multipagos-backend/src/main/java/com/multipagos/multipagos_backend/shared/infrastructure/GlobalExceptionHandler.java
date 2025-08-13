@@ -1,75 +1,75 @@
 package com.multipagos.multipagos_backend.shared.infrastructure;
 
-import com.multipagos.multipagos_backend.topup.presentation.dto.PuntoredErrorResponse;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.multipagos.multipagos_backend.shared.application.util.ResponseFactory;
+import com.multipagos.multipagos_backend.shared.domain.response.ApiErrorResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 
-@Slf4j
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
-  @ExceptionHandler(TopUpValidationException.class)
-  public ResponseEntity<PuntoredErrorResponse> handleTopUpValidationException(TopUpValidationException ex) {
-    log.error("TopUp validation error: {}", ex.getMessage());
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiErrorResponse> handleValidationExceptions(
+            MethodArgumentNotValidException ex, HttpServletRequest request) {
 
-    PuntoredErrorResponse errorResponse = PuntoredErrorResponse.builder()
-        .message(ex.getMessage())
-        .build();
+        log.error("[GLOBAL EXCEPTION] Validation error on path: {}", request.getRequestURI(), ex);
 
-    return ResponseEntity.badRequest().body(errorResponse);
-  }
-
-  @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-    log.error("Validation error: {}", ex.getMessage());
-
-    ErrorResponse errorResponse = ErrorResponse.builder()
-        .timestamp(LocalDateTime.now())
-        .status(HttpStatus.BAD_REQUEST.value())
-        .error("Bad Request")
-        .message(ex.getMessage())
-        .build();
-
-    return ResponseEntity.badRequest().body(errorResponse);
-  }
-
-  @ExceptionHandler(RuntimeException.class)
-  public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
-    log.error("Internal server error: {}", ex.getMessage(), ex);
-
-    ErrorResponse errorResponse = ErrorResponse.builder()
-        .timestamp(LocalDateTime.now())
-        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-        .error("Internal Server Error")
-        .message("An unexpected error occurred")
-        .build();
-
-    return ResponseEntity.internalServerError().body(errorResponse);
-  }
-
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class ErrorResponse {
-    private LocalDateTime timestamp;
-    private int status;
-    private String error;
-    private String message;
-  }
-
-  public static class TopUpValidationException extends RuntimeException {
-    public TopUpValidationException(String message) {
-      super(message);
+        List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
+        return ResponseFactory.validationError(fieldErrors, request.getRequestURI());
     }
-  }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiErrorResponse> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException ex, HttpServletRequest request) {
+
+        log.error("[GLOBAL EXCEPTION] Invalid request body on path: {}", request.getRequestURI(), ex);
+
+        String message = "Cuerpo de solicitud inválido";
+        if (ex.getMessage() != null) {
+            if (ex.getMessage().contains("Required request body is missing")) {
+                message = "El cuerpo de la solicitud es requerido";
+            } else if (ex.getMessage().contains("JSON parse error")) {
+                message = "Formato JSON inválido";
+            }
+        }
+
+        return ResponseFactory.badRequest(message, request.getRequestURI());
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiErrorResponse> handleMissingServletRequestParameterException(
+            MissingServletRequestParameterException ex, HttpServletRequest request) {
+
+        log.error("[GLOBAL EXCEPTION] Missing request parameter on path: {}", request.getRequestURI(), ex);
+        return ResponseFactory.badRequest("Parámetro requerido faltante: " + ex.getParameterName(),
+                request.getRequestURI());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiErrorResponse> handleIllegalArgumentException(
+            IllegalArgumentException ex, HttpServletRequest request) {
+
+        log.error("[GLOBAL EXCEPTION] Illegal argument error on path: {}", request.getRequestURI(), ex);
+        return ResponseFactory.badRequest(ex.getMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorResponse> handleGenericException(
+            Exception ex, HttpServletRequest request) {
+
+        log.error("[GLOBAL EXCEPTION] Unexpected error on path: {}", request.getRequestURI(), ex);
+        return ResponseFactory.internalServerError(request.getRequestURI());
+    }
+
+
 }

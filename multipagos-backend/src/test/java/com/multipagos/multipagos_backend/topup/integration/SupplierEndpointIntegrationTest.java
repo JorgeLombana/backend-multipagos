@@ -25,14 +25,23 @@ class SupplierEndpointIntegrationTest {
 
     @Test
     void testGetSuppliersEndpoint() {
-        String url = "http://localhost:" + port + "/api/suppliers";
-        
+        String url = "http://localhost:" + port + "/api/v1/suppliers";
+
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-        
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
+
+        // Verify standardized response format
+        assertTrue(response.getBody().contains("\"status\":\"success\""));
+        assertTrue(response.getBody().contains("\"message\":\"Suppliers retrieved successfully\""));
+        assertTrue(response.getBody().contains("\"data\":["));
+        assertTrue(response.getBody().contains("\"apiVersion\":\"v1\""));
+        assertTrue(response.getBody().contains("\"timestamp\""));
+
+        // Verify supplier data is present
         assertTrue(response.getBody().contains("Claro") || response.getBody().contains("Movistar"));
-        
+
         logger.info("✅ Endpoint Response: {}", response.getBody());
     }
 }

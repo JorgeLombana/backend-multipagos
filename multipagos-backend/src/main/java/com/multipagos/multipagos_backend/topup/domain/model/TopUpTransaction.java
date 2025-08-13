@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TopUpTransaction {
-  private Long id;
+  private String id;
   private String cellPhone;
   private BigDecimal value;
   private String supplierId;

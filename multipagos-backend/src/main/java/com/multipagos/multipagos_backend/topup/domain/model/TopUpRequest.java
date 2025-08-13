@@ -17,7 +17,6 @@ public class TopUpRequest {
   private String cellPhone;
   private BigDecimal value;
   private String supplierId;
-  private List<String> validSupplierIds = VALID_SUPPLIER_IDS;
 
   private static final List<String> VALID_SUPPLIER_IDS = Arrays.asList("8753", "9773", "3398", "4689");
   private static final BigDecimal MIN_VALUE = new BigDecimal("1000");
@@ -25,10 +24,6 @@ public class TopUpRequest {
 
   public boolean isValid() {
     return isValidCellPhone() && isValidValue() && isValidSupplierId();
-  }
-
-  public void setValidSupplierIds(List<String> validSupplierIds) {
-    this.validSupplierIds = validSupplierIds;
   }
 
   private boolean isValidCellPhone() {
@@ -45,33 +40,46 @@ public class TopUpRequest {
   }
 
   private boolean isValidSupplierId() {
-    return supplierId != null && validSupplierIds != null && validSupplierIds.contains(supplierId);
+    return supplierId != null && VALID_SUPPLIER_IDS.contains(supplierId);
   }
 
   public String getCellPhoneValidationError() {
-    if (cellPhone == null || cellPhone.length() != 10) {
-      return "\"cellPhone\" length must be 10 characters long";
+    if (cellPhone == null || cellPhone.isEmpty()) {
+      return "El número de celular es requerido";
     }
-    if (!cellPhone.startsWith("3") || !cellPhone.matches("\\d{10}")) {
-      return "\"cellPhone\" must start with 3 and contain only numbers";
+    if (cellPhone.length() != 10) {
+      return "El número de celular debe tener exactamente 10 dígitos";
+    }
+    if (!cellPhone.startsWith("3")) {
+      return "El número de celular debe empezar con 3";
+    }
+    if (!cellPhone.matches("\\d{10}")) {
+      return "El número de celular debe contener solo dígitos";
     }
     return null;
   }
 
   public String getValueValidationError() {
-    if (value == null || value.compareTo(MIN_VALUE) < 0) {
-      return "\"value\" must be greater than or equal to " + MIN_VALUE;
+    if (value == null) {
+      return "El valor es requerido";
+    }
+    if (value.compareTo(MIN_VALUE) < 0) {
+      return "El valor debe ser mayor o igual a 1000";
     }
     if (value.compareTo(MAX_VALUE) > 0) {
-      return "\"value\" must be less than or equal to " + MAX_VALUE;
+      return "El valor debe ser menor o igual a 100000";
     }
     return null;
   }
 
   public String getSupplierIdValidationError() {
-    if (!isValidSupplierId()) {
-      return "\"supplierId\" must be one of " + (validSupplierIds != null ? validSupplierIds.toString() : "[]");
+    if (supplierId == null || supplierId.isEmpty()) {
+      return "El ID del proveedor es requerido";
+    }
+    if (!VALID_SUPPLIER_IDS.contains(supplierId)) {
+      return "El ID del proveedor debe ser uno de: 8753 (Claro), 9773 (Movistar), 3398 (Tigo), 4689 (ETB)";
     }
     return null;
   }
+
 }

@@ -1,5 +1,6 @@
 package com.multipagos.multipagos_backend.topup.presentation.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,12 +14,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TopUpTransactionResponse {
-  private Long id;
+  private String id;
   private String cellPhone;
   private BigDecimal value;
   private String supplierName;
   private String status;
   private String transactionalID;
-  private String message;
+  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
   private LocalDateTime createdAt;
 }

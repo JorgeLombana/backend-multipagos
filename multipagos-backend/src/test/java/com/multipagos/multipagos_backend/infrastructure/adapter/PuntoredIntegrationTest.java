@@ -12,7 +12,7 @@ class PuntoredIntegrationTest {
     void testDomainModels() {
         // Test PuntoredToken
         PuntoredToken token = new PuntoredToken("Bearer test-token");
-        assertEquals("Bearer Bearer test-token", token.getBearerToken());
+        assertEquals("Bearer test-token", token.getBearerToken());
         assertEquals("Bearer test-token", token.getToken());
 
         // Test Supplier

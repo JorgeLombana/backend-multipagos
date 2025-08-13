@@ -35,7 +35,7 @@ public class PuntoredAuthAdapter implements PuntoredAuthPort {
 
       HttpEntity<PuntoredAuthRequest> entity = new HttpEntity<>(request, headers);
 
-      log.info("Authenticating with Puntored API");
+      log.info("[PUNTORED AUTH] Authenticating with Puntored API | username: {}", apiProperties.getUsername());
       ResponseEntity<PuntoredAuthResponse> response = restTemplate.exchange(
           url,
           HttpMethod.POST,
@@ -43,14 +43,16 @@ public class PuntoredAuthAdapter implements PuntoredAuthPort {
           PuntoredAuthResponse.class);
 
       if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-        log.info("Authentication successful");
+        log.info("[PUNTORED AUTH] Authentication successful | status: {}", response.getStatusCode());
         return new PuntoredToken(response.getBody().getToken());
       } else {
-        throw new RuntimeException("Authentication failed: " + response.getStatusCode());
+        log.error("[PUNTORED AUTH] Authentication failed | status: {} | body: {}",
+            response.getStatusCode(), response.getBody());
+        throw new RuntimeException("Error de autenticación: " + response.getStatusCode());
       }
     } catch (RestClientException e) {
-      log.error("Error authenticating with Puntored API", e);
-      throw new RuntimeException("Authentication failed", e);
+      log.error("[PUNTORED AUTH] Error authenticating with Puntored API | error: {}", e.getMessage(), e);
+      throw new RuntimeException("Error de autenticación", e);
     }
   }
 }
