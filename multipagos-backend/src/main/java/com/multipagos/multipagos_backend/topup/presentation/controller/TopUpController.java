@@ -1,183 +1,239 @@
 package com.multipagos.multipagos_backend.topup.presentation.controller;
 
-import com.multipagos.multipagos_backend.shared.application.service.JwtService;
+import com.multipagos.multipagos_backend.shared.domain.port.TokenGeneratorPort;
 import com.multipagos.multipagos_backend.shared.application.util.ResponseFactory;
-import com.multipagos.multipagos_backend.topup.application.service.TransactionService;
+import com.multipagos.multipagos_backend.shared.domain.value.PageRequest;
+import com.multipagos.multipagos_backend.shared.domain.value.PagedResult;
+import com.multipagos.multipagos_backend.topup.domain.port.in.TopUpServicePort;
+import com.multipagos.multipagos_backend.topup.domain.port.in.TransactionServicePort;
 import com.multipagos.multipagos_backend.topup.domain.model.TopUpRequest;
-import com.multipagos.multipagos_backend.topup.domain.model.Transaction;
+import com.multipagos.multipagos_backend.topup.domain.model.TransactionDomain;
+import com.multipagos.multipagos_backend.topup.domain.model.valueobject.*;
 import com.multipagos.multipagos_backend.topup.presentation.dto.TopUpRequestDto;
 import com.multipagos.multipagos_backend.topup.presentation.dto.TopUpTransactionResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.List;
 
+/**
+ * TopUp REST Controller implementing Clean Code and SOLID principles
+ * Follows Single Responsibility: handles only HTTP concerns for top-up
+ * operations
+ * Implements proper error handling, logging, and security validation
+ * Uses dependency injection for loose coupling
+ */
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/topup")
-@CrossOrigin(origins = "${app.cors.allowed-origins:http://localhost:3000,http://localhost:3001}")
+@RequestMapping("/topup")
 @RequiredArgsConstructor
 @Validated
 public class TopUpController {
 
-  private final TransactionService transactionService;
-  private final JwtService jwtService;
+  private final TopUpServicePort topUpService;
+  private final TransactionServicePort transactionService;
+  private final TokenGeneratorPort tokenGenerator;
 
+  /**
+   * Processes a mobile top-up transaction
+   * Validates input, authenticates user, and delegates business logic to service
+   * layer
+   * 
+   * @param requestDto The top-up request containing cellphone, amount, and
+   *                   supplier
+   * @param request    HTTP request for extracting authentication token
+   * @return ResponseEntity with transaction result
+   */
   @PostMapping
   public ResponseEntity<?> processTopUp(
       @Valid @RequestBody TopUpRequestDto requestDto,
       HttpServletRequest request) {
 
+    String operationId = generateOperationId("TOPUP", requestDto.getCellPhone());
+
     try {
-      log.info("[TOP-UP REQUEST] Starting top-up process for cellPhone: {} | value: {} | supplier: {}",
-          requestDto.getCellPhone(), requestDto.getValue(), requestDto.getSupplierId());
+      logTopUpRequest(requestDto, operationId);
 
-      // Extract user ID from JWT token
       Long userId = extractUserIdFromRequest(request);
-      log.info("[TOP-UP REQUEST] Processing for user ID: {}", userId);
+      logUserAuthentication(userId, operationId);
 
-      TopUpRequest domainRequest = TopUpRequest.builder()
-          .cellPhone(requestDto.getCellPhone())
-          .value(requestDto.getValue())
-          .supplierId(requestDto.getSupplierId())
-          .build();
+      TopUpRequest domainRequest = buildTopUpRequest(requestDto);
+      TransactionDomain transaction = topUpService.executeTopUp(domainRequest, userId);
+      TopUpTransactionResponse response = buildTransactionResponse(transaction);
 
-      // Process and persist the transaction
-      Transaction transaction = transactionService.processTopUpTransaction(domainRequest, userId);
-
-      TopUpTransactionResponse response = TopUpTransactionResponse.builder()
-          .id(transaction.getId().toString())
-          .cellPhone(transaction.getPhoneNumber())
-          .value(transaction.getAmount())
-          .supplierName(transaction.getSupplierName())
-          .status(transaction.getStatus().name())
-          .transactionalID(transaction.getExternalTransactionId())
-          .createdAt(transaction.getCreatedAt())
-          .message(transaction.getResponseMessage())
-          .build();
-
-      log.info("[TOP-UP SUCCESS] Transaction completed | cellPhone: {} | transactionId: {} | status: {} | supplier: {}",
-          requestDto.getCellPhone(), transaction.getExternalTransactionId(), transaction.getStatus(),
-          transaction.getSupplierName());
+      logTopUpSuccess(requestDto, transaction, operationId);
 
       return ResponseFactory.success(response, "Recarga procesada exitosamente");
 
     } catch (IllegalArgumentException e) {
-      log.error("[TOP-UP VALIDATION ERROR] Validation failed for cellPhone: {} | error: {}",
-          requestDto.getCellPhone(), e.getMessage());
-      return ResponseFactory.badRequest(e.getMessage(), request.getRequestURI());
+      return handleValidationError(e, requestDto.getCellPhone(), operationId, request);
     } catch (Exception e) {
-      log.error("[TOP-UP ERROR] Unexpected error processing top-up for cellPhone: {} | error: {}",
-          requestDto.getCellPhone(), e.getMessage(), e);
-      return ResponseFactory.internalServerError(request.getRequestURI());
-    }
-  }
-
-  @GetMapping("/history")
-  public ResponseEntity<?> getUserTransactionHistory(
-      @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-      HttpServletRequest request) {
-
-    try {
-      log.info("[TRANSACTION HISTORY] Retrieving transaction history | page: {} | size: {}",
-          pageable.getPageNumber(), pageable.getPageSize());
-
-      // Extract user ID from JWT token
-      Long userId = extractUserIdFromRequest(request);
-      log.info("[TRANSACTION HISTORY] Retrieving for user ID: {}", userId);
-
-      Page<Transaction> transactions = transactionService.getUserTransactions(userId, pageable);
-
-      Page<TopUpTransactionResponse> response = transactions.map(transaction -> TopUpTransactionResponse.builder()
-          .id(transaction.getId().toString())
-          .cellPhone(transaction.getPhoneNumber())
-          .value(transaction.getAmount())
-          .supplierName(transaction.getSupplierName())
-          .status(transaction.getStatus().name())
-          .transactionalID(transaction.getExternalTransactionId())
-          .createdAt(transaction.getCreatedAt())
-          .message(transaction.getResponseMessage())
-          .build());
-
-      log.info("[TRANSACTION HISTORY SUCCESS] Retrieved {} transactions for user: {}",
-          response.getContent().size(), userId);
-
-      return ResponseFactory.success(response, "Historial de transacciones obtenido exitosamente");
-
-    } catch (IllegalArgumentException e) {
-      log.error("[TRANSACTION HISTORY VALIDATION ERROR] Validation failed | error: {}", e.getMessage());
-      return ResponseFactory.badRequest(e.getMessage(), request.getRequestURI());
-    } catch (Exception e) {
-      log.error("[TRANSACTION HISTORY ERROR] Unexpected error retrieving history | error: {}", e.getMessage(), e);
-      return ResponseFactory.internalServerError(request.getRequestURI());
-    }
-  }
-
-  @GetMapping("/{transactionId}")
-  public ResponseEntity<?> getTransactionDetails(
-      @PathVariable Long transactionId,
-      HttpServletRequest request) {
-
-    try {
-      log.info("[TRANSACTION DETAILS] Retrieving transaction details for ID: {}", transactionId);
-
-      // Extract user ID from JWT token
-      Long userId = extractUserIdFromRequest(request);
-      log.info("[TRANSACTION DETAILS] Retrieving for user ID: {}", userId);
-
-      Transaction transaction = transactionService.getTransactionById(transactionId, userId);
-
-      TopUpTransactionResponse response = TopUpTransactionResponse.builder()
-          .id(transaction.getId().toString())
-          .cellPhone(transaction.getPhoneNumber())
-          .value(transaction.getAmount())
-          .supplierName(transaction.getSupplierName())
-          .status(transaction.getStatus().name())
-          .transactionalID(transaction.getExternalTransactionId())
-          .createdAt(transaction.getCreatedAt())
-          .updatedAt(transaction.getUpdatedAt())
-          .message(transaction.getResponseMessage())
-          .build();
-
-      log.info("[TRANSACTION DETAILS SUCCESS] Retrieved transaction: {} for user: {}", transactionId, userId);
-
-      return ResponseFactory.success(response, "Detalle de transacción obtenido exitosamente");
-
-    } catch (IllegalArgumentException e) {
-      log.error("[TRANSACTION DETAILS VALIDATION ERROR] Validation failed | transactionId: {} | error: {}",
-          transactionId, e.getMessage());
-      return ResponseFactory.badRequest(e.getMessage(), request.getRequestURI());
-    } catch (Exception e) {
-      log.error("[TRANSACTION DETAILS ERROR] Unexpected error retrieving transaction: {} | error: {}",
-          transactionId, e.getMessage(), e);
-      return ResponseFactory.internalServerError(request.getRequestURI());
+      return handleUnexpectedError(e, requestDto.getCellPhone(), operationId, request);
     }
   }
 
   /**
-   * Extracts user ID from JWT token in Authorization header
+   * Retrieves paginated transaction history for authenticated user
+   * Implements proper pagination and sorting
+   * 
+   * @param page          Request parameter for page number (default: 0)
+   * @param size          Request parameter for page size (default: 20)
+   * @param sortField     Request parameter for sort field (default: createdAt)
+   * @param sortDirection Request parameter for sort direction (default: DESC)
+   * @param request       HTTP request for extracting authentication token
+   * @return ResponseEntity with paginated transaction history
+   */
+  @GetMapping("/history")
+  public ResponseEntity<?> getUserTransactionHistory(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size,
+      @RequestParam(defaultValue = "createdAt") String sortField,
+      @RequestParam(defaultValue = "DESC") String sortDirection,
+      HttpServletRequest request) {
+
+    String operationId = generateOperationId("HISTORY", null);
+
+    try {
+      PageRequest pageRequest = PageRequest.of(page, size, sortField, sortDirection);
+      logHistoryRequest(pageRequest, operationId);
+
+      Long userId = extractUserIdFromRequest(request);
+      logUserAuthentication(userId, operationId);
+
+      PagedResult<TransactionDomain> pagedTransactions = transactionService.getTransactionHistoryPaged(userId,
+          pageRequest);
+      
+      // Map domain objects to response DTOs while preserving pagination info
+      List<TopUpTransactionResponse> responseContent = pagedTransactions.getContent().stream()
+          .map(this::buildTransactionResponse)
+          .toList();
+      
+      // Create PagedResult with DTOs
+      PagedResult<TopUpTransactionResponse> pagedResponse = PagedResult.<TopUpTransactionResponse>builder()
+          .content(responseContent)
+          .page(pagedTransactions.getPage())
+          .size(pagedTransactions.getSize())
+          .totalElements(pagedTransactions.getTotalElements())
+          .totalPages(pagedTransactions.getTotalPages())
+          .first(pagedTransactions.isFirst())
+          .last(pagedTransactions.isLast())
+          .hasNext(pagedTransactions.isHasNext())
+          .hasPrevious(pagedTransactions.isHasPrevious())
+          .build();
+
+      logHistorySuccess(responseContent.size(), userId, operationId);
+
+      return ResponseFactory.success(pagedResponse, "Historial de transacciones obtenido exitosamente");
+
+    } catch (IllegalArgumentException e) {
+      return handleValidationError(e, null, operationId, request);
+    } catch (Exception e) {
+      return handleUnexpectedError(e, null, operationId, request);
+    }
+  }
+
+  // Private helper methods following Single Responsibility Principle
+
+  /**
+   * Extracts user ID from JWT token with proper validation
    */
   private Long extractUserIdFromRequest(HttpServletRequest request) {
     String authHeader = request.getHeader("Authorization");
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+    if (isInvalidAuthorizationHeader(authHeader)) {
       throw new IllegalArgumentException("Token de autorización requerido");
     }
 
     String token = authHeader.substring(7);
-    Long userId = jwtService.extractUserId(token);
+    Long userId = tokenGenerator.extractUserId(token);
 
-    if (userId == null || userId <= 0) {
+    if (isInvalidUserId(userId)) {
       throw new IllegalArgumentException("Token de autorización inválido");
     }
 
     return userId;
+  }
+
+  private boolean isInvalidAuthorizationHeader(String authHeader) {
+    return authHeader == null || !authHeader.startsWith("Bearer ");
+  }
+
+  private boolean isInvalidUserId(Long userId) {
+    return userId == null || userId <= 0;
+  }
+
+  /**
+   * Builds domain request from DTO using builder pattern
+   */
+  private TopUpRequest buildTopUpRequest(TopUpRequestDto requestDto) {
+    return TopUpRequest.builder()
+        .phoneNumber(PhoneNumber.of(requestDto.getCellPhone()))
+        .amount(Amount.of(requestDto.getValue()))
+        .supplierId(SupplierId.of(requestDto.getSupplierId()))
+        .build();
+  }
+
+  /**
+   * Maps transaction domain object to response DTO
+   */
+  private TopUpTransactionResponse buildTransactionResponse(TransactionDomain transaction) {
+    return TopUpTransactionResponse.builder()
+        .id(transaction.getId().toString())
+        .cellPhone(transaction.getPhoneNumber() != null ? transaction.getPhoneNumber().getValue() : null)
+        .value(transaction.getAmount() != null ? transaction.getAmount().getValue() : null)
+        .supplierName(transaction.getSupplierName())
+        .status(transaction.getStatus().name())
+        .transactionalID(transaction.getExternalTransactionId())
+        .createdAt(transaction.getCreatedAt())
+        .updatedAt(transaction.getUpdatedAt()) // Always include updatedAt for consistency
+        .message(transaction.getResponseMessage())
+        .build();
+  }
+
+  private String generateOperationId(String operation, String identifier) {
+    return String.format("%s_%s_%d", operation,
+        identifier != null ? identifier : "USER",
+        System.currentTimeMillis());
+  }
+
+  private void logTopUpRequest(TopUpRequestDto requestDto, String operationId) {
+    log.info("[{}] Top-up request started | cellPhone: {} | value: {} | supplier: {}",
+        operationId, requestDto.getCellPhone(), requestDto.getValue(), requestDto.getSupplierId());
+  }
+
+  private void logUserAuthentication(Long userId, String operationId) {
+    log.info("[{}] User authenticated | userId: {}", operationId, userId);
+  }
+
+  private void logTopUpSuccess(TopUpRequestDto requestDto, TransactionDomain transaction, String operationId) {
+    log.info("[{}] Top-up completed successfully | cellPhone: {} | transactionId: {} | status: {} | supplier: {}",
+        operationId, requestDto.getCellPhone(), transaction.getExternalTransactionId(),
+        transaction.getStatus(), transaction.getSupplierName());
+  }
+
+  private void logHistoryRequest(PageRequest pageRequest, String operationId) {
+    log.info("[{}] Transaction history requested | page: {} | size: {}",
+        operationId, pageRequest.getPage(), pageRequest.getSize());
+  }
+
+  private void logHistorySuccess(int transactionCount, Long userId, String operationId) {
+    log.info("[{}] Transaction history retrieved successfully | count: {} | userId: {}",
+        operationId, transactionCount, userId);
+  }
+
+  private ResponseEntity<?> handleValidationError(IllegalArgumentException e, String identifier,
+      String operationId, HttpServletRequest request) {
+    log.error("[{}] Validation error | identifier: {} | error: {}", operationId, identifier, e.getMessage());
+    return ResponseFactory.badRequest(e.getMessage(), request.getRequestURI());
+  }
+
+  private ResponseEntity<?> handleUnexpectedError(Exception e, String identifier,
+      String operationId, HttpServletRequest request) {
+    log.error("[{}] Unexpected error | identifier: {} | error: {}", operationId, identifier, e.getMessage(), e);
+    return ResponseFactory.internalServerError(request.getRequestURI());
   }
 }

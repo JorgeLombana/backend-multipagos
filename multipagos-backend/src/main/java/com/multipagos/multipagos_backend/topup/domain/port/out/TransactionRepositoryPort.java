@@ -1,7 +1,12 @@
 package com.multipagos.multipagos_backend.topup.domain.port.out;
 
+import com.multipagos.multipagos_backend.shared.domain.value.PageRequest;
+import com.multipagos.multipagos_backend.shared.domain.value.PagedResult;
 import com.multipagos.multipagos_backend.topup.domain.model.TransactionDomain;
 import com.multipagos.multipagos_backend.topup.domain.model.TransactionStatus;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,21 +35,37 @@ public interface TransactionRepositoryPort {
      * @param externalId the external transaction identifier
      * @return Optional containing transaction if found
      */
-    Optional<TransactionDomain> findByTransactionId(String externalId);
+    Optional<TransactionDomain> findByExternalTransactionId(String externalId);
     
     /**
-     * Find all transactions for a user
+     * Find all transactions for a user (including inactive)
      * @param userId the user identifier
-     * @return List of user transactions
+     * @return List of all user transactions
      */
     List<TransactionDomain> findByUserId(Long userId);
     
     /**
-     * Find active transactions for a user
+     * Find active transactions for a user (simple list)
      * @param userId the user identifier
      * @return List of active user transactions
      */
     List<TransactionDomain> findByUserIdAndActiveTrue(Long userId);
+    
+    /**
+     * Find active transactions for a user with pagination
+     * @param userId the user identifier
+     * @param pageRequest pagination parameters
+     * @return PagedResult containing transactions
+     */
+    PagedResult<TransactionDomain> findByUserIdAndActiveTrue(Long userId, PageRequest pageRequest);
+    
+    /**
+     * Find transactions for a user with specific status (active only)
+     * @param userId the user identifier
+     * @param status the transaction status
+     * @return List of transactions matching criteria
+     */
+    List<TransactionDomain> findByUserIdAndStatus(Long userId, TransactionStatus status);
     
     /**
      * Find transactions by phone number (active only)
@@ -54,26 +75,42 @@ public interface TransactionRepositoryPort {
     List<TransactionDomain> findByPhoneNumberAndActiveTrue(String phoneNumber);
     
     /**
-     * Find transactions by status
+     * Find transactions by user and date range
+     * @param userId the user identifier
+     * @param startDate start of date range
+     * @param endDate end of date range
+     * @return List of transactions in date range
+     */
+    List<TransactionDomain> findByUserAndDateRange(Long userId, LocalDateTime startDate, LocalDateTime endDate);
+    
+    /**
+     * Get total transaction amount for user (completed transactions only)
+     * @param userId the user identifier
+     * @return total amount
+     */
+    BigDecimal getTotalAmountByUser(Long userId);
+    
+    /**
+     * Count transactions by status (active only)
      * @param status the transaction status
-     * @return List of transactions with the specified status
+     * @return count of transactions with status
      */
-    List<TransactionDomain> findByStatus(TransactionStatus status);
+    Long countByStatus(TransactionStatus status);
     
     /**
-     * Update transaction status
-     * @param id the transaction ID
-     * @param status the new status
-     * @return updated transaction
+     * Count active transactions for user
+     * @param userId the user identifier
+     * @return count of active transactions
      */
-    Optional<TransactionDomain> updateStatus(Long id, TransactionStatus status);
+    Long countByUserId(Long userId);
     
     /**
-     * Mark transaction as inactive (soft delete)
-     * @param id the transaction ID
-     * @return true if successfully deactivated
+     * Find latest transactions for user (limited)
+     * @param userId the user identifier
+     * @param limit maximum number of transactions
+     * @return List of latest transactions
      */
-    boolean deactivateTransaction(Long id);
+    List<TransactionDomain> findLatestByUserId(Long userId, int limit);
     
     /**
      * Check if transaction exists
@@ -83,15 +120,16 @@ public interface TransactionRepositoryPort {
     boolean existsById(Long id);
     
     /**
-     * Get total count of transactions
-     * @return total number of transactions
+     * Soft delete transaction (mark as inactive)
+     * @param id the transaction ID
      */
-    long count();
+    void deleteById(Long id);
     
     /**
-     * Get count of active transactions for user
-     * @param userId the user identifier
-     * @return count of active transactions
+     * Update transaction status
+     * @param id the transaction ID
+     * @param status the new status
+     * @return updated transaction
      */
-    long countActiveByUserId(Long userId);
+    Optional<TransactionDomain> updateStatus(Long id, TransactionStatus status);
 }

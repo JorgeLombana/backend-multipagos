@@ -1,5 +1,6 @@
 package com.multipagos.multipagos_backend.topup.presentation.dto;
 
+import com.multipagos.multipagos_backend.topup.presentation.validation.ValidSupplier;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +25,6 @@ public class TopUpRequestDto {
   private BigDecimal value;
 
   @NotBlank(message = "El ID del proveedor es requerido")
-  @Pattern(regexp = "^(8753|9773|3398|4689)$", message = "El ID del proveedor debe ser uno de: 8753 (Claro), 9773 (Movistar), 3398 (Tigo), 4689 (ETB)")
+  @ValidSupplier(message = "El ID del proveedor debe ser válido y estar activo")
   private String supplierId;
 }

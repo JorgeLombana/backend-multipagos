@@ -12,10 +12,11 @@ public interface TopUpServicePort {
     /**
      * Execute a top-up transaction
      * @param request the top-up request
+     * @param userId the authenticated user ID
      * @return the created transaction domain object
      * @throws RuntimeException if top-up fails
      */
-    TransactionDomain executeTopUp(TopUpRequest request);
+    TransactionDomain executeTopUp(TopUpRequest request, Long userId);
     
     /**
      * Validate a top-up request before execution

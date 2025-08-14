@@ -2,7 +2,8 @@ package com.multipagos.multipagos_backend.shared.application.util;
 
 import com.multipagos.multipagos_backend.shared.domain.response.ApiErrorResponse;
 import com.multipagos.multipagos_backend.shared.domain.response.ApiResponse;
-import com.multipagos.multipagos_backend.shared.domain.response.PagedResponse;
+import com.multipagos.multipagos_backend.shared.domain.value.PagedResult;
+import com.multipagos.multipagos_backend.shared.infrastructure.response.PagedResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,8 +49,31 @@ public class ResponseFactory {
     return ResponseEntity.ok(response);
   }
 
+  /**
+   * Success response for domain PagedResult (hexagonal architecture compliance)
+   */
+  public static <T> ResponseEntity<ApiResponse<PagedResponse<T>>> success(PagedResult<T> pagedResult, String message) {
+    PagedResponse<T> pagedResponse = PagedResponse.from(pagedResult);
+
+    ApiResponse<PagedResponse<T>> response = ApiResponse.<PagedResponse<T>>builder()
+        .status(SUCCESS_STATUS)
+        .message(message)
+        .data(pagedResponse)
+        .apiVersion(API_VERSION)
+        .build();
+
+    return ResponseEntity.ok(response);
+  }
+
   public static <T> ResponseEntity<ApiResponse<PagedResponse<T>>> success(Page<T> page) {
     return success(page, "Datos obtenidos exitosamente");
+  }
+
+  /**
+   * Success response for domain PagedResult (hexagonal architecture compliance)
+   */
+  public static <T> ResponseEntity<ApiResponse<PagedResponse<T>>> success(PagedResult<T> pagedResult) {
+    return success(pagedResult, "Datos obtenidos exitosamente");
   }
 
   public static ResponseEntity<ApiErrorResponse> error(HttpStatus status, String error, String message, String path) {

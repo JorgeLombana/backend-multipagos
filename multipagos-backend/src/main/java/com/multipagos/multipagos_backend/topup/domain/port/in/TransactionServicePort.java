@@ -1,5 +1,7 @@
 package com.multipagos.multipagos_backend.topup.domain.port.in;
 
+import com.multipagos.multipagos_backend.shared.domain.value.PageRequest;
+import com.multipagos.multipagos_backend.shared.domain.value.PagedResult;
 import com.multipagos.multipagos_backend.topup.domain.model.TransactionDomain;
 import com.multipagos.multipagos_backend.topup.domain.model.TransactionStatus;
 import java.util.List;
@@ -61,4 +63,12 @@ public interface TransactionServicePort {
      * @return List of transaction history
      */
     List<TransactionDomain> getTransactionHistory(Long userId);
+    
+    /**
+     * Get paginated transaction history for user
+     * @param userId the user identifier
+     * @param pageRequest pagination parameters
+     * @return Paged result of transaction history
+     */
+    PagedResult<TransactionDomain> getTransactionHistoryPaged(Long userId, PageRequest pageRequest);
 }

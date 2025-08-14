@@ -9,6 +9,7 @@ import com.multipagos.multipagos_backend.shared.application.util.SecurityValidat
 import com.multipagos.multipagos_backend.shared.domain.exception.AuthenticationException;
 import com.multipagos.multipagos_backend.shared.domain.exception.BusinessException;
 import com.multipagos.multipagos_backend.shared.domain.port.TokenGeneratorPort;
+import com.multipagos.multipagos_backend.shared.domain.valueobject.ValidationResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -114,7 +115,7 @@ public class AuthApplicationService {
   }
 
   private LoginRequest validateAndSanitizeLoginRequest(LoginRequest originalRequest) {
-    SecurityValidator.ValidationResult emailResult = securityValidator.validateEmail(originalRequest.getEmail());
+    ValidationResult emailResult = securityValidator.validateEmail(originalRequest.getEmail());
     if (!emailResult.isValid()) {
       throw new IllegalArgumentException(emailResult.getErrorMessage());
     }
@@ -127,12 +128,12 @@ public class AuthApplicationService {
   }
 
   private RegisterRequest validateAndSanitizeRegisterRequest(RegisterRequest originalRequest) {
-    SecurityValidator.ValidationResult emailResult = securityValidator.validateEmail(originalRequest.getEmail());
+    ValidationResult emailResult = securityValidator.validateEmail(originalRequest.getEmail());
     if (!emailResult.isValid()) {
       throw new IllegalArgumentException(emailResult.getErrorMessage());
     }
 
-    SecurityValidator.ValidationResult nameResult = securityValidator.validateUserName(originalRequest.getName());
+    ValidationResult nameResult = securityValidator.validateUserName(originalRequest.getName());
     if (!nameResult.isValid()) {
       throw new IllegalArgumentException(nameResult.getErrorMessage());
     }
