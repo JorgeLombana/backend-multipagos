@@ -1,85 +1,101 @@
 package com.multipagos.multipagos_backend.topup.domain.model;
 
+import com.multipagos.multipagos_backend.topup.domain.model.valueobject.Amount;
+import com.multipagos.multipagos_backend.topup.domain.model.valueobject.PhoneNumber;
+import com.multipagos.multipagos_backend.topup.domain.model.valueobject.SupplierId;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
 
+/**
+ * TopUpRequest Domain Model
+ * Uses Value Objects to ensure validation and business rules
+ * Pure domain model with no infrastructure dependencies
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TopUpRequest {
-  private String cellPhone;
-  private BigDecimal value;
-  private String supplierId;
 
-  private static final List<String> VALID_SUPPLIER_IDS = Arrays.asList("8753", "9773", "3398", "4689");
-  private static final BigDecimal MIN_VALUE = new BigDecimal("1000");
-  private static final BigDecimal MAX_VALUE = new BigDecimal("100000");
+  private PhoneNumber phoneNumber;
+  private Amount amount;
+  private SupplierId supplierId;
 
+  /**
+   * Constructor for backward compatibility with primitive types
+   * Automatically creates Value Objects with validation
+   */
+  public TopUpRequest(String cellPhone, BigDecimal value, String supplierIdValue) {
+    this.phoneNumber = PhoneNumber.of(cellPhone);
+    this.amount = Amount.of(value);
+    this.supplierId = SupplierId.of(supplierIdValue);
+  }
+
+  /**
+   * Backward compatibility methods for existing code
+   */
+  public String getCellPhone() {
+    return phoneNumber != null ? phoneNumber.getValue() : null;
+  }
+
+  public void setCellPhone(String cellPhone) {
+    this.phoneNumber = cellPhone != null ? PhoneNumber.of(cellPhone) : null;
+  }
+
+  public BigDecimal getValue() {
+    return amount != null ? amount.getValue() : null;
+  }
+
+  public void setValue(BigDecimal value) {
+    this.amount = value != null ? Amount.of(value) : null;
+  }
+
+  public String getSupplierId() {
+    return supplierId != null ? supplierId.getValue() : null;
+  }
+
+  public void setSupplierId(String supplierIdValue) {
+    this.supplierId = supplierIdValue != null ? SupplierId.of(supplierIdValue) : null;
+  }
+
+  /**
+   * Domain validation using Value Objects
+   */
   public boolean isValid() {
-    return isValidCellPhone() && isValidValue() && isValidSupplierId();
+    return phoneNumber != null && amount != null && supplierId != null;
   }
 
-  private boolean isValidCellPhone() {
-    return cellPhone != null
-        && cellPhone.length() == 10
-        && cellPhone.startsWith("3")
-        && cellPhone.matches("\\d{10}");
+  /**
+   * Business rule: Check if supplier is compatible with phone number
+   */
+  public boolean isSupplierCompatible() {
+    return phoneNumber != null && supplierId != null &&
+        supplierId.supportsPhoneNumber(phoneNumber);
   }
 
-  private boolean isValidValue() {
-    return value != null
-        && value.compareTo(MIN_VALUE) >= 0
-        && value.compareTo(MAX_VALUE) <= 0;
+  /**
+   * Get supplier name for business operations
+   */
+  public String getSupplierName() {
+    return supplierId != null ? supplierId.getSupplierName() : null;
   }
 
-  private boolean isValidSupplierId() {
-    return supplierId != null && VALID_SUPPLIER_IDS.contains(supplierId);
+  /**
+   * Get Value Object instances directly (not the primitive values)
+   */
+  public PhoneNumber getPhoneNumberVO() {
+    return phoneNumber;
   }
 
-  public String getCellPhoneValidationError() {
-    if (cellPhone == null || cellPhone.isEmpty()) {
-      return "El número de celular es requerido";
-    }
-    if (cellPhone.length() != 10) {
-      return "El número de celular debe tener exactamente 10 dígitos";
-    }
-    if (!cellPhone.startsWith("3")) {
-      return "El número de celular debe empezar con 3";
-    }
-    if (!cellPhone.matches("\\d{10}")) {
-      return "El número de celular debe contener solo dígitos";
-    }
-    return null;
+  public Amount getAmountVO() {
+    return amount;
   }
 
-  public String getValueValidationError() {
-    if (value == null) {
-      return "El valor es requerido";
-    }
-    if (value.compareTo(MIN_VALUE) < 0) {
-      return "El valor debe ser mayor o igual a 1000";
-    }
-    if (value.compareTo(MAX_VALUE) > 0) {
-      return "El valor debe ser menor o igual a 100000";
-    }
-    return null;
+  public SupplierId getSupplierIdVO() {
+    return supplierId;
   }
-
-  public String getSupplierIdValidationError() {
-    if (supplierId == null || supplierId.isEmpty()) {
-      return "El ID del proveedor es requerido";
-    }
-    if (!VALID_SUPPLIER_IDS.contains(supplierId)) {
-      return "El ID del proveedor debe ser uno de: 8753 (Claro), 9773 (Movistar), 3398 (Tigo), 4689 (ETB)";
-    }
-    return null;
-  }
-
 }
