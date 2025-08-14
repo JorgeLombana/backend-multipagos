@@ -25,7 +25,4 @@ public class RegisterRequest {
   @Size(min = 8, message = "La contraseña debe tener mínimo 8 caracteres")
   @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&].*$", message = "La contraseña debe contener al menos: 1 minúscula, 1 mayúscula, 1 número y 1 carácter especial")
   private String password;
-
-  @Pattern(regexp = "^3\\d{9}$", message = "El teléfono debe iniciar en 3 y tener 10 dígitos")
-  private String phoneNumber;
 }

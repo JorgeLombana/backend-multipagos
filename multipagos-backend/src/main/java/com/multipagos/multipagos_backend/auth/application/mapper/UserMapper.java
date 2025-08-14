@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 /**
  * Maps between presentation DTOs and domain entities
- * Following hexagonal architecture principles
  */
 @Component
 public class UserMapper {
@@ -16,7 +15,6 @@ public class UserMapper {
     user.setName(registerRequest.getName());
     user.setEmail(registerRequest.getEmail());
     user.setPassword(registerRequest.getPassword());
-    user.setPhoneNumber(registerRequest.getPhoneNumber());
     return user;
   }
 }

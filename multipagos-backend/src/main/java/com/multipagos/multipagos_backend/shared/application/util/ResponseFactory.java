@@ -2,6 +2,7 @@ package com.multipagos.multipagos_backend.shared.application.util;
 
 import com.multipagos.multipagos_backend.shared.domain.response.ApiErrorResponse;
 import com.multipagos.multipagos_backend.shared.domain.response.ApiResponse;
+import com.multipagos.multipagos_backend.shared.domain.response.PagedResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,10 @@ import org.springframework.validation.FieldError;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Factory class for creating standardized API responses
+ * Ensures consistent response format across all endpoints
+ */
 public class ResponseFactory {
 
   private static final String API_VERSION = "v1";
@@ -30,19 +35,20 @@ public class ResponseFactory {
     return success(data, "Operación completada exitosamente");
   }
 
-  public static <T> ResponseEntity<ApiResponse<List<T>>> success(Page<T> page, String message) {
+  public static <T> ResponseEntity<ApiResponse<PagedResponse<T>>> success(Page<T> page, String message) {
+    PagedResponse<T> pagedResponse = PagedResponse.from(page);
 
-    ApiResponse<List<T>> response = ApiResponse.<List<T>>builder()
+    ApiResponse<PagedResponse<T>> response = ApiResponse.<PagedResponse<T>>builder()
         .status(SUCCESS_STATUS)
         .message(message)
-        .data(page.getContent())
+        .data(pagedResponse)
         .apiVersion(API_VERSION)
         .build();
 
     return ResponseEntity.ok(response);
   }
 
-  public static <T> ResponseEntity<ApiResponse<List<T>>> success(Page<T> page) {
+  public static <T> ResponseEntity<ApiResponse<PagedResponse<T>>> success(Page<T> page) {
     return success(page, "Datos obtenidos exitosamente");
   }
 

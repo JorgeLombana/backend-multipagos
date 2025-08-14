@@ -22,4 +22,7 @@ public class TopUpTransactionResponse {
   private String transactionalID;
   @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
   private LocalDateTime createdAt;
+  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+  private LocalDateTime updatedAt;
+  private String message;
 }

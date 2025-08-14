@@ -29,8 +29,7 @@ public class AuthenticationService {
     LoginResponse.UserInfo userInfo = new LoginResponse.UserInfo(
         user.getId(),
         user.getName(),
-        user.getEmail(),
-        user.getPhoneNumber());
+        user.getEmail());
 
     return new LoginResponse(token, userInfo);
   }

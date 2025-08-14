@@ -20,7 +20,6 @@ public class LoginResponse {
     private Long id;
     private String name;
     private String email;
-    private String phoneNumber;
   }
 
   public LoginResponse(String token, UserInfo user) {

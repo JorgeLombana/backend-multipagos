@@ -22,16 +22,16 @@ import jakarta.validation.Valid;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1/auth")
 @CrossOrigin(origins = "${app.cors.allowed-origins:http://localhost:3000,http://localhost:3001}")
 @RequiredArgsConstructor
-public class UserController {
+public class AuthController {
 
   private final UserServicePort userService;
   private final AuthenticationService authenticationService;
   private final UserMapper userMapper;
 
-  @PostMapping
+  @PostMapping("/register")
   public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest,
       HttpServletRequest request) {
     try {

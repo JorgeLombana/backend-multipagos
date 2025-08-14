@@ -4,7 +4,6 @@ import com.multipagos.multipagos_backend.shared.domain.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,8 +34,4 @@ public class User extends BaseEntity {
     @Size(min = 6, message = "La contraseña debe tener mínimo 6 caracteres")
     @Column(name = "password", nullable = false)
     private String password;
-
-    @Pattern(regexp = "^3\\d{9}$", message = "El teléfono debe iniciar en 3 y tener 10 dígitos")
-    @Column(name = "phone_number", length = 10)
-    private String phoneNumber;
 }
