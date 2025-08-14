@@ -1,7 +1,12 @@
 package com.multipagos.multipagos_backend.auth.presentation.controller;
 
-import com.multipagos.multipagos_backend.auth.application.service.UserService;
+import com.multipagos.multipagos_backend.auth.application.mapper.UserMapper;
+import com.multipagos.multipagos_backend.auth.application.service.AuthenticationService;
 import com.multipagos.multipagos_backend.auth.domain.model.User;
+import com.multipagos.multipagos_backend.auth.domain.port.UserServicePort;
+import com.multipagos.multipagos_backend.auth.presentation.dto.LoginRequest;
+import com.multipagos.multipagos_backend.auth.presentation.dto.LoginResponse;
+import com.multipagos.multipagos_backend.auth.presentation.dto.RegisterRequest;
 import com.multipagos.multipagos_backend.shared.application.util.ResponseFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,68 +15,71 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import java.util.Map;
 
+/**
+ * REST controller for user registration and authentication
+ * Follows hexagonal architecture and single responsibility principle
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "${app.cors.allowed-origins:http://localhost:3000,http://localhost:3001}")
 @RequiredArgsConstructor
 public class UserController {
 
-  private final UserService userService;
+  private final UserServicePort userService;
+  private final AuthenticationService authenticationService;
+  private final UserMapper userMapper;
 
   @PostMapping
-  public ResponseEntity<?> createUser(@Valid @RequestBody User user, HttpServletRequest request) {
+  public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest,
+      HttpServletRequest request) {
     try {
-      log.info("[USER CREATE] Creating user with email: {}", user.getEmail());
+      log.info("[USER REGISTER] Registration attempt for email: {}", registerRequest.getEmail());
 
-      User createdUser = userService.createUser(user);
-      createdUser.setPassword("***");
+      User user = userMapper.toDomain(registerRequest);
+      User registeredUser = userService.registerUser(user);
 
-      log.info("[USER CREATE SUCCESS] User created successfully | ID: {} | email: {}",
-          createdUser.getId(), createdUser.getEmail());
+      LoginResponse response = authenticationService.createAuthResponse(registeredUser);
 
-      return ResponseFactory.success(createdUser, "Usuario creado exitosamente");
+      log.info("[USER REGISTER SUCCESS] User registered and authenticated | ID: {} | email: {}",
+          registeredUser.getId(), registeredUser.getEmail());
+
+      return ResponseFactory.success(response, "Usuario registrado exitosamente");
 
     } catch (IllegalArgumentException e) {
-      log.error("[USER CREATE ERROR] Validation failed | email: {} | error: {}",
-          user.getEmail(), e.getMessage());
+      log.error("[USER REGISTER ERROR] Business validation failed | email: {} | error: {}",
+          registerRequest.getEmail(), e.getMessage());
       return ResponseFactory.badRequest(e.getMessage(), request.getRequestURI());
     } catch (Exception e) {
-      log.error("[USER CREATE ERROR] Unexpected error | email: {} | error: {}",
-          user.getEmail(), e.getMessage(), e);
+      log.error("[USER REGISTER ERROR] Unexpected error | email: {} | error: {}",
+          registerRequest.getEmail(), e.getMessage(), e);
       return ResponseFactory.internalServerError(request.getRequestURI());
     }
   }
 
-  @PostMapping("/validate-password")
-  public ResponseEntity<?> validatePassword(@RequestBody Map<String, String> credentials,
-      HttpServletRequest request) {
+  @PostMapping("/login")
+  public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
     try {
-      String email = credentials.get("email");
-      String password = credentials.get("password");
+      log.info("[USER LOGIN] Authentication attempt for email: {}", loginRequest.getEmail());
 
-      log.info("[USER LOGIN] Login attempt for email: {}", email);
+      User authenticatedUser = userService.authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());
 
-      if (email == null || password == null) {
-        log.warn("[USER LOGIN ERROR] Missing credentials | email: {} | password: {}",
-            email != null ? email : "null", password != null ? "provided" : "null");
-        return ResponseFactory.badRequest("Email y contraseña son requeridos", request.getRequestURI());
-      }
+      if (authenticatedUser != null) {
+        LoginResponse response = authenticationService.createAuthResponse(authenticatedUser);
 
-      boolean isValid = userService.validatePassword(email, password);
+        log.info("[USER LOGIN SUCCESS] Authentication successful | email: {} | ID: {}",
+            loginRequest.getEmail(), authenticatedUser.getId());
 
-      if (isValid) {
-        log.info("[USER LOGIN SUCCESS] Valid credentials | email: {}", email);
-        return ResponseFactory.success(Map.of("valid", true), "Credenciales válidas");
+        return ResponseFactory.success(response, "Login exitoso");
       } else {
-        log.warn("[USER LOGIN FAILED] Invalid credentials | email: {}", email);
-        return ResponseFactory.success(Map.of("valid", false), "Credenciales inválidas");
+        log.warn("[USER LOGIN FAILED] Invalid credentials | email: {}", loginRequest.getEmail());
+        return ResponseFactory.badRequest("Credenciales inválidas", request.getRequestURI());
       }
 
     } catch (Exception e) {
-      log.error("[USER LOGIN ERROR] Error validating password | error: {}", e.getMessage(), e);
+      log.error("[USER LOGIN ERROR] Unexpected error during authentication | email: {} | error: {}",
+          loginRequest.getEmail(), e.getMessage(), e);
       return ResponseFactory.internalServerError(request.getRequestURI());
     }
   }

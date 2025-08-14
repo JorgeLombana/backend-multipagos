@@ -1,19 +1,23 @@
 package com.multipagos.multipagos_backend.shared.application.service;
 
-import com.multipagos.multipagos_backend.auth.application.service.UserService;
 import com.multipagos.multipagos_backend.auth.domain.model.User;
+import com.multipagos.multipagos_backend.auth.domain.port.UserServicePort;
 import com.multipagos.multipagos_backend.auth.infrastructure.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service to initialize test data on application startup
+ * Uses domain port to maintain loose coupling
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class DataInitializerService implements CommandLineRunner {
 
-  private final UserService userService;
+  private final UserServicePort userService;
   private final UserRepository userRepository;
 
   @Override
@@ -32,7 +36,7 @@ public class DataInitializerService implements CommandLineRunner {
         testUser.setPassword("password123");
         testUser.setPhoneNumber("3001234567");
 
-        userService.createUser(testUser);
+        userService.registerUser(testUser);
         log.info("[DATA INITIALIZER] Test user created: test@multipagos.com");
       } else {
         log.info("[DATA INITIALIZER] Test user already exists: test@multipagos.com");
@@ -45,7 +49,7 @@ public class DataInitializerService implements CommandLineRunner {
         adminUser.setPassword("admin123");
         adminUser.setPhoneNumber("3007654321");
 
-        userService.createUser(adminUser);
+        userService.registerUser(adminUser);
         log.info("[DATA INITIALIZER] Admin user created: admin@multipagos.com");
       } else {
         log.info("[DATA INITIALIZER] Admin user already exists: admin@multipagos.com");
