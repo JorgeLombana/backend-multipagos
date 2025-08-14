@@ -1,32 +1,40 @@
-import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { AuthProvider } from '@/contexts';
+import { ROUTES } from '@/lib/constants';
+import { RegisterPage, LoginPage, DashboardPage } from './pages';
 import './App.css';
-import { Button } from './components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 
 function App() {
   return (
-    <>
-      <Button>Click me</Button>
-      <Dialog>
-        <DialogTrigger>Open</DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Are you absolutely sure?</DialogTitle>
-            <DialogDescription>
-              This action cannot be undone. This will permanently delete your account and remove your data from our
-              servers.
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
-    </>
+    <AuthProvider>
+      <Router>
+        <div className="min-h-screen bg-background">
+          <Routes>
+            {/* Default redirect to register */}
+            <Route path="/" element={<Navigate to={ROUTES.REGISTER} replace />} />
+            
+            {/* Auth routes */}
+            <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
+            <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+            
+            {/* Protected routes */}
+            <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
+            
+            {/* Catch all - redirect to register */}
+            <Route path="*" element={<Navigate to={ROUTES.REGISTER} replace />} />
+          </Routes>
+          
+          {/* Global toast notifications */}
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+            }}
+          />
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

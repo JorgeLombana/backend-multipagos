@@ -52,10 +52,7 @@ class ApiService {
     this.client.interceptors.response.use(
       (response: AxiosResponse) => {
         if (import.meta.env.DEV) {
-          console.log(
-            `API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`,
-            response.data
-          );
+          console.log(`API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
         }
         return response;
       },
@@ -160,8 +157,8 @@ class ApiService {
 
       case 401:
         return {
-          error: 'Unauthorized',
-          message: 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.',
+          error: data.error || 'Unauthorized',
+          message: data.message || 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.',
           path: data.path || error.config?.url || '',
           timestamp: data.timestamp || new Date().toISOString(),
           apiVersion: data.apiVersion || 'v1',
@@ -169,8 +166,8 @@ class ApiService {
 
       case 403:
         return {
-          error: 'Forbidden',
-          message: 'No tiene permisos para realizar esta acción.',
+          error: data.error || 'Forbidden',
+          message: data.message || 'No tiene permisos para realizar esta acción.',
           path: data.path || error.config?.url || '',
           timestamp: data.timestamp || new Date().toISOString(),
           apiVersion: data.apiVersion || 'v1',
@@ -178,8 +175,8 @@ class ApiService {
 
       case 404:
         return {
-          error: 'Not Found',
-          message: 'El recurso solicitado no fue encontrado.',
+          error: data.error || 'Not Found',
+          message: data.message || 'El recurso solicitado no fue encontrado.',
           path: data.path || error.config?.url || '',
           timestamp: data.timestamp || new Date().toISOString(),
           apiVersion: data.apiVersion || 'v1',
@@ -197,8 +194,8 @@ class ApiService {
 
       case 500:
         return {
-          error: 'Internal Server Error',
-          message: 'Error interno del servidor. Intente nuevamente más tarde.',
+          error: data.error || 'Internal Server Error',
+          message: data.message || 'Error interno del servidor. Intente nuevamente más tarde.',
           path: data.path || error.config?.url || '',
           timestamp: data.timestamp || new Date().toISOString(),
           apiVersion: data.apiVersion || 'v1',

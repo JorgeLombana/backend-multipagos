@@ -6,6 +6,8 @@ import com.multipagos.multipagos_backend.auth.presentation.dto.LoginRequest;
 import com.multipagos.multipagos_backend.auth.presentation.dto.LoginResponse;
 import com.multipagos.multipagos_backend.auth.presentation.dto.RegisterRequest;
 import com.multipagos.multipagos_backend.shared.application.util.ResponseFactory;
+import com.multipagos.multipagos_backend.shared.domain.exception.AuthenticationException;
+import com.multipagos.multipagos_backend.shared.domain.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +46,10 @@ public class AuthController {
       log.warn("[AUTH CONTROLLER] Registration validation failed for email: {} | error: {}",
           registerRequest.getEmail(), e.getMessage());
       return ResponseFactory.badRequest(e.getMessage(), request.getRequestURI());
+    } catch (BusinessException e) {
+      log.warn("[AUTH CONTROLLER] Registration business rule failed for email: {} | error: {}",
+          registerRequest.getEmail(), e.getMessage());
+      return ResponseFactory.badRequest(e.getMessage(), request.getRequestURI());
     } catch (Exception e) {
       log.error("[AUTH CONTROLLER] Registration error for email: {} | error: {}",
           registerRequest.getEmail(), e.getMessage(), e);
@@ -69,6 +75,10 @@ public class AuthController {
       log.warn("[AUTH CONTROLLER] Login validation failed for email: {} | error: {}",
           loginRequest.getEmail(), e.getMessage());
       return ResponseFactory.badRequest(e.getMessage(), request.getRequestURI());
+    } catch (AuthenticationException e) {
+      log.warn("[AUTH CONTROLLER] Authentication failed for email: {} | error: {}",
+          loginRequest.getEmail(), e.getMessage());
+      return ResponseFactory.unauthorized(e.getMessage(), request.getRequestURI());
     } catch (Exception e) {
       log.error("[AUTH CONTROLLER] Login error for email: {} | error: {}",
           loginRequest.getEmail(), e.getMessage(), e);

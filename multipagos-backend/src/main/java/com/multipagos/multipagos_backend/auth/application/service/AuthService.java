@@ -35,14 +35,14 @@ public class AuthService implements AuthServicePort {
 
       if (userOpt.isEmpty()) {
         log.warn("Authentication failed - user not found: {}", email);
-        throw new AuthenticationException("Invalid email or password");
+        throw new AuthenticationException("Email o contraseña incorrectos");
       }
 
       UserDomain user = userOpt.get();
 
       if (!passwordEncoder.matches(password, user.getPassword())) {
         log.warn("Authentication failed - invalid password for user: {}", email);
-        throw new AuthenticationException("Invalid email or password");
+        throw new AuthenticationException("Email o contraseña incorrectos");
       }
 
       log.info("Authentication successful for user: {}", email);
@@ -52,7 +52,7 @@ public class AuthService implements AuthServicePort {
       throw e;
     } catch (Exception e) {
       log.error("Unexpected error during authentication for user: {}", email, e);
-      throw new AuthenticationException("Authentication failed");
+      throw new AuthenticationException("Error de autenticación");
     }
   }
 
@@ -63,7 +63,7 @@ public class AuthService implements AuthServicePort {
     try {
       if (userRepository.findByEmail(email).isPresent()) {
         log.warn("Registration failed - user already exists: {}", email);
-        throw new BusinessException("User with this email already exists");
+        throw new BusinessException("Ya existe un usuario registrado con este email");
       }
 
       String encodedPassword = passwordEncoder.encode(password);
@@ -84,7 +84,7 @@ public class AuthService implements AuthServicePort {
       throw e;
     } catch (Exception e) {
       log.error("Unexpected error during registration for user: {}", email, e);
-      throw new BusinessException("Registration failed");
+      throw new BusinessException("Error en el registro de usuario");
     }
   }
 
@@ -98,7 +98,7 @@ public class AuthService implements AuthServicePort {
 
       if (userOpt.isEmpty()) {
         log.warn("User not found with ID: {}", userId);
-        throw new BusinessException("User not found");
+        throw new BusinessException("Usuario no encontrado");
       }
 
       return userOpt.get();
@@ -107,7 +107,7 @@ public class AuthService implements AuthServicePort {
       throw e;
     } catch (Exception e) {
       log.error("Unexpected error retrieving user with ID: {}", userId, e);
-      throw new BusinessException("Error retrieving user");
+      throw new BusinessException("Error al obtener el usuario");
     }
   }
 }

@@ -70,7 +70,7 @@ public class AuthApplicationService {
     } catch (Exception e) {
       log.error("[AUTH APP] Unexpected error during authentication for email: {} | error: {}",
           loginRequest.getEmail(), e.getMessage(), e);
-      throw new AuthenticationException("Authentication failed due to system error");
+      throw new AuthenticationException("Error en el sistema durante la autenticación");
     }
   }
 
@@ -104,7 +104,7 @@ public class AuthApplicationService {
     } catch (Exception e) {
       log.error("[AUTH APP] Unexpected error during registration for email: {} | error: {}",
           registerRequest.getEmail(), e.getMessage(), e);
-      throw new BusinessException("Registration failed due to system error");
+      throw new BusinessException("Error en el sistema durante el registro");
     }
   }
 
