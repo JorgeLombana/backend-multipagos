@@ -1,6 +1,5 @@
 package com.multipagos.multipagos_backend.topup.presentation.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.multipagos.multipagos_backend.topup.presentation.dto.TopUpRequestDto;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -27,9 +26,6 @@ class TopUpEndpointIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Test
     void testTopUpEndpointValidation() {

@@ -1,6 +1,5 @@
 package com.multipagos.multipagos_backend.topup.presentation.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
@@ -19,9 +18,6 @@ class TopUpControllerValidationTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Test
     void shouldReturnBadRequestWhenNoBodyProvided() throws Exception {

@@ -39,6 +39,7 @@
 # VS Code
 /multipagos-backend/.vscode/
 /multipagos-backend/.kiro/
+.github
 
 # Monorepo-wide ignores (helpful for future frontend)
 **/node_modules/
