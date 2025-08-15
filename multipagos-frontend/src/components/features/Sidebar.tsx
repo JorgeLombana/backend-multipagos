@@ -29,7 +29,7 @@ const modules = [
 export function Sidebar({ currentModule, onModuleChange, onLogout }: SidebarProps) {
   const handleLogoutClick = () => {
     toast('¿Cerrar sesión?', {
-      description: 'Tendrás que iniciar sesión nuevamente para acceder a tu cuenta.',
+      description: 'Tendrás que iniciar sesión nuevamente.',
       action: {
         label: 'Cerrar Sesión',
         onClick: () => onLogout(),
@@ -45,8 +45,8 @@ export function Sidebar({ currentModule, onModuleChange, onLogout }: SidebarProp
         title: 'text-slate-800 font-semibold',
         description: 'text-slate-600',
         actionButton:
-          'bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 border-0 shadow-md',
-        cancelButton: 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300',
+          '!bg-gradient-to-r !from-red-500 !to-pink-500 !text-white hover:!from-red-600 hover:!to-pink-600 !border-0 !shadow-md !rounded-lg !font-medium !transition-all !duration-200 hover:!shadow-lg',
+        cancelButton: ' !rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300',
       },
     });
   };
