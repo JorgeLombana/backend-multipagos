@@ -516,7 +516,8 @@ Password: YOUR_PUNTORED_PASSWORD
 - **Completado:** Sistema de logs estructurados con Spring Boot Actuator
 - **Completado:** Monitoreo de health checks y métricas
 - **Completado:** Integración con AWS CloudWatch
-- <img width="1917" height="919" alt="image" src="https://github.com/user-attachments/assets/c5de4078-2d3a-414a-8d99-31a112efc311" />
+<img width="1918" height="922" alt="image" src="https://github.com/user-attachments/assets/07dd25b4-89a2-44f5-af41-50b373cfae26" />
+
 
 ---
 
