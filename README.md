@@ -494,35 +494,29 @@ Password: YOUR_PUNTORED_PASSWORD
 
 ### ✓ Nivel 0: API Spring Boot
 - **Completado:** API Java con Spring Boot que integra servicios de Puntored (auth, getSuppliers, buy)
-- **Extra:** Tests unitarios implementados
 - **Arquitectura:** Hexagonal/Clean Architecture con separación de responsabilidades
 
 ### ✓ Nivel 1: Base de Datos
 - **Completado:** Almacenamiento de información transaccional en MySQL
 - **Completado:** Listar transacciones realizadas por el usuario (consulta de histórico)
-- **Extra:** Paginación, filtros y búsqueda avanzada
+- **Extra:** Paginación, filtros
 
 ### ✓ Nivel 2: Frontend React
 - **Completado:** Frontend React que consume la API del Nivel 0
 - **Completado:** Permitir al usuario realizar recargas de operadores móviles
 - **Completado:** Al finalizar compra, mostrar resumen y ticket retornado por Puntored
 - **Completado:** Módulo de consulta de transacciones realizadas
-- **Extra:** Módulo de login con autenticación propia (JWT)
-- **Extra:** Tests unitarios para componentes críticos
+- **completado:** Módulo de login con autenticación propia (JWT)
 
 ### Nivel 3: Despliegue en Nube
-- **Estado:** Preparado para despliegue (AWS/GCP/Azure)
-- **Configuración:** CloudWatch logs, variables de entorno, Docker ready
+- **Completado:** Preparado para despliegue (AWS/GCP/Azure)
+- **COmpletado:** CloudWatch logs, variables de entorno, Docker ready
 
 ### ✓ Nivel 4: Logs y Monitoreo (Extra)
 - **Completado:** Sistema de logs estructurados con Spring Boot Actuator
 - **Completado:** Monitoreo de health checks y métricas
-- **Preparado:** Integración con AWS CloudWatch
-
-### ✓ Nivel 5: Pruebas Automatizadas (Extra)
-- **Completado:** Tests unitarios para servicios críticos del backend
-- **Completado:** Tests de integración para endpoints principales
-- **Completado:** Tests unitarios para componentes React principales
+- **Completado:** Integración con AWS CloudWatch
+- <img width="1917" height="919" alt="image" src="https://github.com/user-attachments/assets/c5de4078-2d3a-414a-8d99-31a112efc311" />
 
 ---
 
@@ -837,33 +831,3 @@ npm test
 
 ---
 
-### Instalación Rápida (Resumen)
-
-**Pre-requisitos:** Java 21, Node.js 20, MySQL 8, Maven 3.8
-
-```bash
-# 1. Clonar y configurar
-git clone https://github.com/JorgeLombana/multi-pagos.git
-cd multi-pagos
-
-# 2. Inicializar base de datos
-mysql -u root -p < database/init.sql
-
-# 3. Iniciar backend  
-cd multipagos-backend && ./mvnw spring-boot:run
-
-# 4. Iniciar frontend (nueva terminal)
-cd multipagos-frontend && npm install && npm run dev
-
-# 5. Abrir aplicación
-# http://localhost:5173
-```
-
-**¡El proyecto está listo para evaluación!** ✅
-
----
-
-**Desarrollado como parte del desafío técnico para MultiPagos**  
-**Niveles completados:** 0, 1, 2 + Extras (4, 5)  
-**Tecnologías:** Spring Boot + React + TypeScript + MySQL  
-**Integración:** API Puntored completa
