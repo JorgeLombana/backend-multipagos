@@ -81,7 +81,7 @@ USE multipagos;
 
 -- Crear usuario específico (opcional pero recomendado)
 CREATE USER IF NOT EXISTS 'multipagos_user'@'localhost' 
-IDENTIFIED BY 'MultiPagos2024!';
+IDENTIFIED BY 'YOUR_SECURE_PASSWORD';
 
 GRANT ALL PRIVILEGES ON multipagos.* TO 'multipagos_user'@'localhost';
 FLUSH PRIVILEGES;
@@ -118,17 +118,17 @@ Editar `multipagos-backend/src/main/resources/application.properties`:
 # Configuración de Base de Datos - AJUSTAR SEGÚN TU CONFIGURACIÓN
 spring.datasource.url=jdbc:mysql://localhost:3306/multipagos?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
 spring.datasource.username=root
-spring.datasource.password=TU_PASSWORD_MYSQL
+spring.datasource.password=YOUR_MYSQL_PASSWORD
 
 # O si creaste el usuario específico:
 # spring.datasource.username=multipagos_user  
-# spring.datasource.password=MultiPagos2024!
+# spring.datasource.password=YOUR_SECURE_PASSWORD
 
-# Puntored API - YA CONFIGURADA SEGÚN ESPECIFICACIONES
-puntored.api.base-url=https://us-central1-puntored-dev.cloudfunctions.net/technicalTest-developer/api
-puntored.api.key=mtrQF6Q11eosqyQnkMY0JGFbGqcxVg5icvfVnX1ifIyWDvwGApJ8WUM8nHVrdSkN
-puntored.api.username=user0147
-puntored.api.password=#3Q34Sh0NlDS
+# Puntored API - CONFIGURAR CON TUS CREDENCIALES
+puntored.api.base-url=https://your-puntored-api-url/api
+puntored.api.key=YOUR_PUNTORED_API_KEY
+puntored.api.username=YOUR_PUNTORED_USERNAME
+puntored.api.password=YOUR_PUNTORED_PASSWORD
 
 # Configuración JPA - Para crear tablas automáticamente
 spring.jpa.hibernate.ddl-auto=create-drop
@@ -243,8 +243,8 @@ Registrar nuevo usuario en el sistema.
 ```json
 {
   "name": "Juan Pérez",
-  "email": "juan@example.com",
-  "password": "Password123@"
+  "email": "user@example.com",
+  "password": "SecurePass123@"
 }
 ```
 
@@ -263,8 +263,8 @@ Autenticación en el sistema (genera JWT).
 **Request:**
 ```json
 {
-  "email": "juan@example.com", 
-  "password": "Password123@"
+  "email": "user@example.com", 
+  "password": "SecurePass123@"
 }
 ```
 
@@ -279,7 +279,7 @@ Autenticación en el sistema (genera JWT).
     "user": {
       "id": 1,
       "name": "Juan Pérez",
-      "email": "juan@example.com"
+      "email": "user@example.com"
     }
   }
 }
@@ -318,7 +318,7 @@ Content-Type: application/json
 **Request:**
 ```json
 {
-  "cellPhone": "3197821272",
+  "cellPhone": "3012345678",
   "value": 10000,
   "supplierId": "8753"
 }
@@ -336,7 +336,7 @@ Content-Type: application/json
   "message": "Recarga procesada exitosamente",
   "data": {
     "id": "123",
-    "cellPhone": "3197821272",
+    "cellPhone": "3012345678",
     "value": 10000,
     "supplierName": "Claro", 
     "status": "SUCCESS",
@@ -393,7 +393,7 @@ Authorization: Bearer {jwt-token}
     "content": [
       {
         "id": "123",
-        "cellPhone": "3197821272", 
+        "cellPhone": "3012345678", 
         "value": 10000,
         "supplierName": "Claro",
         "status": "SUCCESS",
@@ -473,13 +473,13 @@ Según especificaciones del desafío:
 
 ### Integración con API de Puntored
 
-**URL Base:** `https://us-central1-puntored-dev.cloudfunctions.net/technicalTest-developer/api`
+**URL Base:** `https://your-puntored-api-url/api`
 
 **Credenciales configuradas:**
 ```
-API Key: mtrQF6Q11eosqyQnkMY0JGFbGqcxVg5icvfVnX1ifIyWDvwGApJ8WUM8nHVrdSkN
-Usuario: user0147  
-Password: #3Q34Sh0NlDS
+API Key: YOUR_PUNTORED_API_KEY
+Usuario: YOUR_PUNTORED_USERNAME  
+Password: YOUR_PUNTORED_PASSWORD
 ```
 
 **Proveedores soportados:**

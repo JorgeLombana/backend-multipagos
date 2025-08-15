@@ -6,7 +6,7 @@ CREATE DATABASE multipagos CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Crear usuario específico
 DROP USER IF EXISTS 'multipagos_user'@'localhost';
-CREATE USER 'multipagos_user'@'localhost' IDENTIFIED BY 'MultiPagos2024!';
+CREATE USER 'multipagos_user'@'localhost' IDENTIFIED BY 'YOUR_SECURE_PASSWORD';
 
 -- Otorgar permisos
 GRANT ALL PRIVILEGES ON multipagos.* TO 'multipagos_user'@'localhost';
