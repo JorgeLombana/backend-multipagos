@@ -7,6 +7,7 @@ export interface ApiResponse<T = any> {
 }
 
 export interface ApiError {
+  status?: string;
   error: string;
   message: string;
   path: string;

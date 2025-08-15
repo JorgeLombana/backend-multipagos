@@ -1,10 +1,11 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { ROUTES } from '@/lib/constants';
+import { GRADIENTS } from '@/lib/theme';
 import { loginSchema, type LoginFormData } from '@/lib/schemas';
 import { useAuth } from '@/contexts';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +16,11 @@ import { Button } from '@/components/ui/button';
 function LoginPage() {
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+
+  // Get the intended destination or default to dashboard
+  const from = location.state?.from?.pathname || ROUTES.DASHBOARD;
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -31,7 +36,9 @@ function LoginPage() {
       const successMessage = response?.message || 'Inicio de sesión exitoso';
       toast.success(successMessage);
       form.reset();
-      navigate(ROUTES.DASHBOARD);
+
+      // Navigate to the intended route or dashboard
+      navigate(from, { replace: true });
     } catch (error: any) {
       let errorMessage = 'Error al iniciar sesión';
 
@@ -51,11 +58,11 @@ function LoginPage() {
   const isFormLoading = isLoading || form.formState.isSubmitting;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-fuchsia-100 p-4">
-      <Card className="w-full max-w-md shadow-xl border-0">
+    <div className={`min-h-screen flex items-center justify-center ${GRADIENTS.background} p-4`}>
+      <Card className="w-full max-w-md shadow-xl border-0 backdrop-blur-sm bg-white/90">
         <CardHeader className="space-y-1 justify-items-center py-4">
-          <CardTitle className="text-2xl font-bold text-gray-900">Multi-Pagos</CardTitle>
-          <p className="text-gray-600">Accede a tu cuenta de Multi-Pagos</p>
+          <CardTitle className="text-2xl font-bold text-slate-800">Multi-Pagos</CardTitle>
+          <p className="text-slate-600">Accede a tu cuenta de Multi-Pagos</p>
         </CardHeader>
 
         <div className="p-6 space-y-4">
@@ -67,14 +74,14 @@ function LoginPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Correo electrónico</FormLabel>
+                    <FormLabel className="text-slate-700">Correo electrónico</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
                         <Input
                           type="email"
                           placeholder="correo@ejemplo.com"
-                          className="pl-10"
+                          className="pl-10 border-slate-200 focus:border-slate-400"
                           disabled={isFormLoading}
                           {...field}
                         />
@@ -91,21 +98,21 @@ function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contraseña</FormLabel>
+                    <FormLabel className="text-slate-700">Contraseña</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
                         <Input
                           type={showPassword ? 'text' : 'password'}
                           placeholder="Ingresa tu contraseña"
-                          className="pl-10 pr-10"
+                          className="pl-10 pr-10 border-slate-200 focus:border-slate-400"
                           disabled={isFormLoading}
                           {...field}
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                           disabled={isFormLoading}
                         >
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -120,7 +127,7 @@ function LoginPage() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 text-white font-medium py-2 px-4 rounded-md transition-all duration-200"
+                className={`w-full ${GRADIENTS.primary} ${GRADIENTS.primaryHover} text-white font-medium py-2 px-4 rounded-md transition-all duration-200 shadow-md hover:shadow-lg`}
                 disabled={isFormLoading}
               >
                 {isFormLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
@@ -129,9 +136,9 @@ function LoginPage() {
           </Form>
 
           {/* Register Link */}
-          <div className="text-center text-sm text-gray-600">
+          <div className="text-center text-sm text-slate-600">
             ¿No tienes cuenta?{' '}
-            <Link to={ROUTES.REGISTER} className="text-pink-600 hover:text-fuchsia-500 font-medium transition-colors">
+            <Link to={ROUTES.REGISTER} className="text-blue-600 hover:text-purple-600 font-medium transition-colors">
               Regístrate aquí
             </Link>
           </div>

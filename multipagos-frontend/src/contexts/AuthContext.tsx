@@ -23,7 +23,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize auth state from localStorage
     const initializeAuth = () => {
       try {
         const storedUser = authService.getUser();
@@ -44,7 +43,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     };
 
+    const handleUnauthorized = () => {
+      console.warn('Unauthorized access detected, logging out user');
+      setUser(null);
+      authService.logout();
+    };
+
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+
     initializeAuth();
+
+    return () => {
+      window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    };
   }, []);
 
   const login = async (data: LoginRequest): Promise<AuthResponse> => {

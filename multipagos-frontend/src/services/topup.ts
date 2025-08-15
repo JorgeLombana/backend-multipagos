@@ -178,31 +178,6 @@ class TopupService {
       sortDirection: params.sortDirection ?? defaults.sortDirection
     };
   }
-
-  /**
-   * Format currency for display
-   * @param amount - Amount in cents or basic unit
-   * @returns Formatted currency string
-   */
-  static formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
-  }
-
-  /**
-   * Format phone number for display
-   * @param phoneNumber - Raw phone number
-   * @returns Formatted phone number
-   */
-  static formatPhoneNumber(phoneNumber: string): string {
-    if (!phoneNumber || phoneNumber.length !== 10) return phoneNumber;
-    
-    return `${phoneNumber.slice(0, 3)} ${phoneNumber.slice(3, 6)} ${phoneNumber.slice(6)}`;
-  }
 }
 
 export const topupService = new TopupService();

@@ -3,11 +3,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Loader2, User, Mail, Lock } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 import { useAuth } from '@/contexts';
 import { registerFormSchema, type RegisterFormData } from '@/lib/schemas';
 import { ROUTES } from '@/lib/constants';
+import { GRADIENTS } from '@/lib/theme';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
@@ -66,25 +67,26 @@ function RegisterPage() {
   const isFormLoading = isLoading || isSubmitting;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-fuchsia-100 p-4">
-      <Card className="w-full max-w-md shadow-xl border-0">
+    <div className={`min-h-screen flex items-center justify-center ${GRADIENTS.background} p-4`}>
+      <Card className="w-full max-w-md shadow-xl border-0 backdrop-blur-sm bg-white/90">
         <CardHeader className="space-y-1 justify-items-center py-4">
-          <CardTitle className="text-2xl font-bold text-gray-900">Multi-Pagos</CardTitle>
-          <p className="text-gray-600">Ingresa tus datos para registrarte en Multi-Pagos</p>
+          <CardTitle className="text-2xl font-bold text-slate-800">Multi-Pagos</CardTitle>
+          <p className="text-slate-600">Ingresa tus datos para registrarte en Multi-Pagos</p>
         </CardHeader>
 
         <div className="p-6 space-y-4">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Name Field */}
             <div className="space-y-2">
-              <Label htmlFor="name">Nombre completo</Label>
+              <Label htmlFor="name" className="text-slate-700">
+                Nombre completo
+              </Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
                 <Input
                   id="name"
                   type="text"
                   placeholder="Ingresa tu nombre completo"
-                  className="pl-10"
+                  className="pl-10 border-slate-200 focus:border-slate-400"
                   {...register('name')}
                   disabled={isFormLoading}
                 />
@@ -92,16 +94,17 @@ function RegisterPage() {
               {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
             </div>
 
-            {/* Email Field */}
             <div className="space-y-2">
-              <Label htmlFor="email">Correo electrónico</Label>
+              <Label htmlFor="email" className="text-slate-700">
+                Correo electrónico
+              </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="correo@ejemplo.com"
-                  className="pl-10"
+                  className="pl-10 border-slate-200 focus:border-slate-400"
                   {...register('email')}
                   disabled={isFormLoading}
                 />
@@ -109,22 +112,23 @@ function RegisterPage() {
               {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
             </div>
 
-            {/* Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password" className="text-slate-700">
+                Contraseña
+              </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Crea una contraseña segura"
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 border-slate-200 focus:border-slate-400"
                   {...register('password')}
                   disabled={isFormLoading}
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={isFormLoading}
                 >
@@ -134,22 +138,23 @@ function RegisterPage() {
               {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}
             </div>
 
-            {/* Confirm Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+              <Label htmlFor="confirmPassword" className="text-slate-700">
+                Confirmar contraseña
+              </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="Confirma tu contraseña"
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 border-slate-200 focus:border-slate-400"
                   {...register('confirmPassword')}
                   disabled={isFormLoading}
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   disabled={isFormLoading}
                 >
@@ -161,7 +166,7 @@ function RegisterPage() {
 
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 text-white"
+              className={`w-full ${GRADIENTS.primary} ${GRADIENTS.primaryHover} text-white shadow-md hover:shadow-lg transition-all duration-200`}
               disabled={isFormLoading}
             >
               {isFormLoading ? (
@@ -174,9 +179,9 @@ function RegisterPage() {
               )}
             </Button>
 
-            <div className="text-center text-sm text-gray-600">
+            <div className="text-center text-sm text-slate-600">
               ¿Ya tienes cuenta?{' '}
-              <Link to={ROUTES.LOGIN} className="text-pink-600 hover:text-fuchsia-500 font-medium">
+              <Link to={ROUTES.LOGIN} className="text-blue-600 hover:text-purple-600 font-medium">
                 Inicia sesión
               </Link>
             </div>

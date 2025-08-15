@@ -82,7 +82,14 @@ class ApiService {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
 
-    if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+    const currentPath = window.location.pathname;
+    if (currentPath !== '/login' && currentPath !== '/register') {
+      window.dispatchEvent(
+        new CustomEvent('auth:unauthorized', {
+          detail: { redirectTo: '/login' },
+        })
+      );
+
       window.location.href = '/login';
     }
   }
